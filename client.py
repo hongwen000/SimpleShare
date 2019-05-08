@@ -4,7 +4,7 @@ import sys
 import codecs
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QClipboard, QTextCursor
+from PyQt5.QtGui import QIcon, QClipboard, QTextCursor, QGuiApplication
 import xmlrpc.client
 import pathlib
 
