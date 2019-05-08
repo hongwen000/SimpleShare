@@ -90,6 +90,8 @@ def get_file_size(fn):
 
 @server.register_function
 def clear_all():
+    global db
+    global c
     db.close()
     os.system('rm -rf ./files')
     os.system('rm -rf msg.db')
