@@ -1,5 +1,5 @@
 # SimpleShare
-Cross platform FILE and TEXT sharing tool.
+Easy to use, cross platform FILE and TEXT sharing tool.
 
 Written with PyQt
 
