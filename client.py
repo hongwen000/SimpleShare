@@ -4,7 +4,7 @@ import sys
 import codecs
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QClipboard,QTextCursor
+from PyQt5.QtGui import QIcon, QClipboard, QTextCursor
 import xmlrpc.client
 import pathlib
 
@@ -45,18 +45,23 @@ class Window(QMainWindow):
         try:
             self.proxy = xmlrpc.client.ServerProxy(self.server_addr)
             print(self.proxy.system.listMethods())
-            self.log("Connected to " + self.server_addr) 
+            self.log("Connected to " + self.server_addr)
         except ConnectionError:
-            self.log("Error connecting to " + self.server_addr) 
+            self.log("Error connecting to " + self.server_addr)
 
         # self.add_matplotlib_figure()
 
     def set_stretch(self):
-        self.msg_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.file_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.text_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.send_text_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.reflush_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.msg_list.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.file_list.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.text_box.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.send_text_button.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.reflush_button.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.status_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     def log(self, msg):
@@ -79,7 +84,7 @@ class Window(QMainWindow):
         self.grid.setSpacing(20)
         main_frame = QWidget()
         main_frame.setLayout(self.grid)
-        self.setCentralWidget(main_frame)    
+        self.setCentralWidget(main_frame)
 
     def do_send_file(self):
         fn = self.open_file_button.text()
@@ -87,10 +92,11 @@ class Window(QMainWindow):
         p = pathlib.Path(fn)
         self.proxy.rpc_send_file_open(p.name)
         sent_bytes_cnt = 0
-        with open(fn , 'rb') as f:
+        with open(fn, 'rb') as f:
             b = f.read(CHUNCK_SIZE)
             while b:
-                self.proxy.rpc_send_file_content(p.name, xmlrpc.client.Binary(filezip(b)))
+                self.proxy.rpc_send_file_content(
+                    p.name, xmlrpc.client.Binary(filezip(b)))
                 sent_bytes_cnt += len(b)
                 self.log('Sent ' + str(sent_bytes_cnt))
                 b = f.read(CHUNCK_SIZE)
@@ -101,12 +107,12 @@ class Window(QMainWindow):
         self.send_file_button = QPushButton('send file', parent=self)
         self.grid.addWidget(self.send_file_button, 0, 1)
         self.send_file_button.clicked.connect(self.do_send_file)
-    
 
     def show_open_file_dialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '', 'All Files (*);;CSV (*.csv)', options=options)
+        fileName, _ = QFileDialog.getOpenFileName(
+            self, 'QFileDialog.getOpenFileName()', '', 'All Files (*);;CSV (*.csv)', options=options)
         if fileName:
             self.open_file_button.setText(fileName)
 
@@ -114,16 +120,16 @@ class Window(QMainWindow):
         self.open_file_button = QPushButton('open file', parent=self)
         self.grid.addWidget(self.open_file_button, 0, 0)
         self.open_file_button.clicked.connect(self.show_open_file_dialog)
-    
+
     def add_text_edit(self):
         self.text_box = QPlainTextEdit(self)
         self.grid.addWidget(self.text_box, 1, 0, 3, 1)
 
     def add_send_text_button(self):
-        self.send_text_button = QPushButton('send text', parent = self)
+        self.send_text_button = QPushButton('send text', parent=self)
         self.grid.addWidget(self.send_text_button, 1, 1)
         self.send_text_button.clicked.connect(self.do_send_text)
-    
+
     def do_send_text(self):
         self.log("Sending text")
         self.proxy.rpc_send_text(self.text_box.toPlainText())
@@ -138,7 +144,7 @@ class Window(QMainWindow):
         self.grid.addWidget(self.msg_list, 1, 2, 3, 1)
         self.msg_list.itemDoubleClicked.connect(self.on_msg_clicked)
         # self.msg_list.setFixedWidth(100)
-    
+
     def add_labels(self):
         self.grid.addWidget(QLabel('msg list', parent=self), 0, 2)
         self.grid.addWidget(QLabel('file list', parent=self), 0, 3)
@@ -151,7 +157,7 @@ class Window(QMainWindow):
         self.reflush_button = QPushButton('REFLUSH!', parent=self)
         self.grid.addWidget(self.reflush_button, 2, 1)
         self.reflush_button.clicked.connect(self.do_reflush)
-    
+
     def do_reflush(self):
         msg_l, file_l = self.proxy.get_update()
         self.msg_l = [strunzip(msg) for msg in msg_l]
@@ -167,7 +173,7 @@ class Window(QMainWindow):
         self.file_list = QListWidget(self)
         self.file_list.itemDoubleClicked.connect(self.on_file_clicked)
         self.grid.addWidget(self.file_list, 1, 3, 3, 1)
-    
+
     def on_file_clicked(self, item):
         fn = item.text()
         flen = self.proxy.get_file_size(fn)
@@ -176,15 +182,16 @@ class Window(QMainWindow):
         for i in range(math.ceil(flen/CHUNCK_SIZE)):
             b = self.proxy.download_file(fn, i * CHUNCK_SIZE)
             f.write(fileunzip(b))
-            self.log(fn + ': downloaded ' + str(i * CHUNCK_SIZE) + '(' + str(i * CHUNCK_SIZE / flen) + '%)' )
+            self.log(fn + ': downloaded ' + str(i * CHUNCK_SIZE) +
+                     '(' + str(i * CHUNCK_SIZE / flen) + '%)')
         f.close()
         self.log(fn + ': downloaded ' + str(flen) + '(100%)')
-    
+
     def add_clearall(self):
         self.clear_all_button = QPushButton('CLEAR REMOTE!!!')
-        self.grid.addWidget(self.clear_all_button,3,1)
+        self.grid.addWidget(self.clear_all_button, 3, 1)
         self.clear_all_button.clicked.connect(self.do_clear_all)
-    
+
     def do_clear_all(self):
         self.proxy.clear_all()
 

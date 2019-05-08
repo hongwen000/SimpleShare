@@ -11,8 +11,11 @@ from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
 # Restrict to a particular path.
+
+
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
+
 
 # Create server
 server = SimpleXMLRPCServer(('0.0.0.0', 10011), requestHandler=RequestHandler)
@@ -30,12 +33,16 @@ c = db.cursor()
 c.execute('create table if not exists msg (what text)')
 db.commit()
 
+
 def rpc_send_text(s):
     print(s)
     c.execute('insert into msg values (?)', [s])
     db.commit()
     return True
+
+
 server.register_function(rpc_send_text)
+
 
 @server.register_function
 def rpc_send_file_open(fn):
@@ -45,12 +52,14 @@ def rpc_send_file_open(fn):
     processing_file[fn] = f
     return True
 
+
 @server.register_function
 def rpc_send_file_content(fn, b):
     fn = './files/' + fn
     f = processing_file[fn]
     f.write(fileunzip(b))
     return True
+
 
 @server.register_function
 def rpc_send_file_close(fn):
@@ -67,6 +76,7 @@ def get_update():
     files = [strzip(f.name) for f in p.iterdir() if not f.is_dir()]
     return msgs, files
 
+
 @server.register_function
 def download_file(fn, loc):
     fn = './files/' + fn
@@ -74,15 +84,18 @@ def download_file(fn, loc):
         f.seek(loc)
         return xmlrpc.client.Binary(filezip(f.read(CHUNCK_SIZE)))
 
+
 @server.register_function
 def get_file_size(fn):
     fn = './files/' + fn
     return os.path.getsize(fn)
 
+
 @server.register_function
 def clear_all():
     os.system('rm -rf ./files')
     os.system('rm -rf msg.db')
+
 
 # Run the server's main loop
 server.serve_forever()
