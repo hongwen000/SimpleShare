@@ -24,13 +24,12 @@ server.register_introspection_functions()
 
 processing_file = {}
 
-db = sqlite3.connect('msg.db')
-os.system('mkdir -p files')
-
-c = db.cursor()
-
-c.execute('create table if not exists msg (what text)')
-db.commit()
+def init():
+    db = sqlite3.connect('msg.db')
+    os.system('mkdir -p files')
+    c = db.cursor()
+    c.execute('create table if not exists msg (what text)')
+    db.commit()
 
 
 def rpc_send_text(s):
@@ -92,10 +91,10 @@ def get_file_size(fn):
 
 @server.register_function
 def clear_all():
+    db.close()
     os.system('rm -rf ./files')
     os.system('rm -rf msg.db')
-    db = sqlite3.connect('msg.db')
-    os.system('mkdir -p files')
+    init()
     return True
 
 
