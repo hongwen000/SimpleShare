@@ -25,7 +25,6 @@ server.register_introspection_functions()
 processing_file = {}
 
 db = sqlite3.connect('msg.db')
-
 os.system('mkdir -p files')
 
 c = db.cursor()
@@ -95,6 +94,9 @@ def get_file_size(fn):
 def clear_all():
     os.system('rm -rf ./files')
     os.system('rm -rf msg.db')
+    db = sqlite3.connect('msg.db')
+    os.system('mkdir -p files')
+    return True
 
 
 # Run the server's main loop
