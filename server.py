@@ -23,6 +23,8 @@ processing_file = {}
 
 db = sqlite3.connect('msg.db')
 
+os.system('mkdir -p files')
+
 c = db.cursor()
 
 c.execute('create table if not exists msg (what text)')
