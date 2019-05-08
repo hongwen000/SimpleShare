@@ -4,8 +4,7 @@ import sys
 import codecs
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QClipboard
-from components.plot_canvas import *
+from PyQt5.QtGui import QIcon, QClipboard,QTextCursor
 import xmlrpc.client
 import pathlib
 
@@ -37,8 +36,9 @@ class Window(QMainWindow):
         self.add_msg_list()
         self.add_file_list()
         self.add_labels()
+        self.add_clearall()
         self.add_status_box()
-        self.server_addr = 'http://localhost:10011'
+        self.server_addr = 'http://pi:10011'
         self.add_reflush_button()
         self.set_stretch()
         self.grid.setRowStretch(0, 10)
@@ -117,7 +117,7 @@ class Window(QMainWindow):
     
     def add_text_edit(self):
         self.text_box = QPlainTextEdit(self)
-        self.grid.addWidget(self.text_box, 1, 0, 2, 1)
+        self.grid.addWidget(self.text_box, 1, 0, 3, 1)
 
     def add_send_text_button(self):
         self.send_text_button = QPushButton('send text', parent = self)
@@ -135,7 +135,7 @@ class Window(QMainWindow):
 
     def add_msg_list(self):
         self.msg_list = QListWidget(self)
-        self.grid.addWidget(self.msg_list, 1, 2, 2, 1)
+        self.grid.addWidget(self.msg_list, 1, 2, 3, 1)
         self.msg_list.itemDoubleClicked.connect(self.on_msg_clicked)
         # self.msg_list.setFixedWidth(100)
     
@@ -145,7 +145,7 @@ class Window(QMainWindow):
 
     def add_status_box(self):
         self.status_box = QPlainTextEdit(self)
-        self.grid.addWidget(self.status_box, 3, 0, 1, 4)
+        self.grid.addWidget(self.status_box, 4, 0, 1, 4)
 
     def add_reflush_button(self):
         self.reflush_button = QPushButton('REFLUSH!', parent=self)
@@ -166,7 +166,7 @@ class Window(QMainWindow):
     def add_file_list(self):
         self.file_list = QListWidget(self)
         self.file_list.itemDoubleClicked.connect(self.on_file_clicked)
-        self.grid.addWidget(self.file_list, 1, 3, 2, 1)
+        self.grid.addWidget(self.file_list, 1, 3, 3, 1)
     
     def on_file_clicked(self, item):
         fn = item.text()
@@ -179,6 +179,15 @@ class Window(QMainWindow):
             self.log(fn + ': downloaded ' + str(i * CHUNCK_SIZE) + '(' + str(i * CHUNCK_SIZE / flen) + '%)' )
         f.close()
         self.log(fn + ': downloaded ' + str(flen) + '(100%)')
+    
+    def add_clearall(self):
+        self.clear_all_button = QPushButton('CLEAR REMOTE!!!')
+        self.grid.addWidget(self.clear_all_button,3,1)
+        self.clear_all_button.clicked.connect(self.do_clear_all)
+    
+    def do_clear_all(self):
+        self.proxy.clear_all()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -186,5 +195,5 @@ if __name__ == '__main__':
     window.show()
     try:
         app.exec_()
-    except ConnectionError:
-        self.log("Error connecting to " + self.server_addr) 
+    except Exception:
+        pass

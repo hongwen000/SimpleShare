@@ -107,3 +107,4 @@ files
 ./files/*
 msg.db
 
+.vscode
